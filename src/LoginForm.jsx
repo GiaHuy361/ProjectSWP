@@ -96,7 +96,7 @@ const LoginForm = () => {
       </div>
 
       <div className="login-footer-links">
-        <a href="#">Quên mật khẩu?</a>
+        <a href="/forgot-password">Quên mật khẩu?</a>
         <span> | </span>
         <Link to="/register">Tạo tài khoản mới</Link>
       </div>
