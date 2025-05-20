@@ -1,11 +1,59 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Dùng để điều hướng
+import { Link } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
+
+  // Xử lý đăng nhập Google thành công
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const token = credentialResponse.credential;
+
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/login-google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ idToken: token }),
+
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        setMessage("Google login failed: " + errorText);
+        setError(true);
+        return;
+      }
+
+      const data = await response.json();
+      setMessage("Đăng nhập thành công bằng Google");
+      setError(false);
+      console.log("Login success:", data);
+    } catch (error) {
+      setMessage("Lỗi kết nối server: " + error.message);
+      setError(true);
+    }
+  };
+  const handleGoogleFailure = () => {
+  setMessage("Đăng nhập Google thất bại");
+  setError(true);
+};
+
+
+
+  // Xử lý đăng nhập Facebook thành công
+  const handleFacebookResponse = async (response) => {
+    if (response.accessToken) {
+      console.log("Facebook token:", response.accessToken);
+      // TODO: Gửi token này lên backend để xác thực
+    } else {
+      setMessage("Đăng nhập Facebook thất bại");
+      setError(true);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,16 +130,31 @@ const LoginForm = () => {
         <hr className="line" />
       </div>
 
-      <div className="social-icons">
-        <img
-          className="social-icon"
-          src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
-          alt="Facebook"
+      <div
+        className="social-icons"
+        style={{ display: "flex", justifyContent: "center", gap: "20px" }}
+      >
+        <FacebookLogin
+          appId="YOUR_FACEBOOK_APP_ID" // Thay bằng App ID của bạn
+          autoLoad={false}
+          callback={handleFacebookResponse}
+          render={(renderProps) => (
+            <img
+              className="social-icon"
+              src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
+              alt="Facebook"
+              onClick={renderProps.onClick}
+              style={{ cursor: "pointer", width: "40px", height: "40px" }}
+            />
+          )}
         />
-        <img
-          className="social-icon"
-          src="https://cdn-icons-png.flaticon.com/512/300/300221.png"
-          alt="Google"
+
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleFailure}
+          useOneTap
+          width={40}
+          shape="circle"
         />
       </div>
 
