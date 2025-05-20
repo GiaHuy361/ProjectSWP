@@ -32,9 +32,35 @@ public class User {
     @Column(nullable = false)
     private Integer status;
 
-    public User() {}
+    // --- Bước 1: thêm 2 trường GoogleId và loginType ---
 
-    // Getter và Setter
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
+    @Column(name = "login_type", nullable = false)
+    private String loginType = "local";
+
+    // --- Getter và Setter mới ---
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getLoginType() {
+        return loginType;
+    }
+
+    public void setLoginType(String loginType) {
+        this.loginType = loginType;
+    }
+
+    // --- Getter và Setter cũ ---
+
+    public User() {}
 
     public Long getId() {
         return id;

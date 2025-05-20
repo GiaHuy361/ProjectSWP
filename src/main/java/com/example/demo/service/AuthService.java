@@ -2,19 +2,23 @@ package com.example.demo.service;
 
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final GoogleTokenVerifierService googleTokenVerifierService;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, GoogleTokenVerifierService googleTokenVerifierService) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
+        this.googleTokenVerifierService = googleTokenVerifierService;
     }
 
     public boolean authenticate(String email, String rawPassword) {
@@ -42,5 +46,9 @@ public class AuthService {
 
         System.out.println("Mật khẩu đã được mã hóa và lưu thành công cho user: " + email);
     }
-}
 
+    // Method verify Google token
+    public GoogleIdToken.Payload verifyGoogleToken(String idTokenString) throws Exception {
+        return googleTokenVerifierService.verify(idTokenString);
+    }
+}

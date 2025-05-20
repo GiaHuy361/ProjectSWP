@@ -12,10 +12,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+
 public class AuthController {
 
     private final AuthService authService;
@@ -86,5 +88,47 @@ public class AuthController {
             return ResponseEntity.status(500).body("Lỗi hệ thống: " + e.getMessage());
         }
     }
+    @PostMapping("/login-google")
+    public ResponseEntity<?> loginGoogle(@RequestBody GoogleLoginRequest request) {
+        try {
+            // Verify token với service bạn đã tạo (GoogleTokenVerifierService)
+            Payload payload = authService.verifyGoogleToken(request.getIdToken());
+
+            if (payload == null) {
+                return ResponseEntity.status(401).body("Token Google không hợp lệ");
+            }
+
+            String email = payload.getEmail();
+
+            // Tìm user theo email
+            Optional<User> userOpt = userRepository.findByEmail(email);
+
+            User user;
+            if (userOpt.isPresent()) {
+                user = userOpt.get();
+            } else {
+                // Nếu chưa có user, tạo mới
+                Role userRole = roleRepository.findByName("USER")
+                        .orElseGet(() -> roleRepository.save(new Role(null, "USER")));
+
+                user = new User();
+                user.setEmail(email);
+                user.setUsername(email);
+                user.setFullName((String) payload.get("name"));
+                user.setRole(userRole);
+                user.setStatus(1);
+                user.setPasswordHash("");
+
+                userRepository.save(user);
+            }
+
+            return ResponseEntity.ok(user);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Lỗi hệ thống: " + e.getMessage());
+        }
+    }
+
+
 
 }
