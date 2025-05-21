@@ -6,8 +6,10 @@ import jakarta.persistence.*;
 @Table(name = "users")
 public class User {
 
+    // Tên cột trong DB là user_id, nên phải chỉ rõ tên này cho Hibernate
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(unique = true, length = 50, nullable = false)
@@ -32,36 +34,15 @@ public class User {
     @Column(nullable = false)
     private Integer status;
 
-    // --- Bước 1: thêm 2 trường GoogleId và loginType ---
-
     @Column(name = "google_id", unique = true)
     private String googleId;
 
     @Column(name = "login_type", nullable = false)
     private String loginType = "local";
 
-    // --- Getter và Setter mới ---
-
-    public String getGoogleId() {
-        return googleId;
-    }
-
-    public void setGoogleId(String googleId) {
-        this.googleId = googleId;
-    }
-
-    public String getLoginType() {
-        return loginType;
-    }
-
-    public void setLoginType(String loginType) {
-        this.loginType = loginType;
-    }
-
-    // --- Getter và Setter cũ ---
-
     public User() {}
 
+    // Getters và Setters
     public Long getId() {
         return id;
     }
@@ -70,6 +51,7 @@ public class User {
         this.id = id;
     }
 
+    // Các getter/setter còn lại giữ nguyên
     public String getUsername() {
         return username;
     }
@@ -124,5 +106,21 @@ public class User {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+    public String getLoginType() {
+        return loginType;
+    }
+
+    public void setLoginType(String loginType) {
+        this.loginType = loginType;
     }
 }

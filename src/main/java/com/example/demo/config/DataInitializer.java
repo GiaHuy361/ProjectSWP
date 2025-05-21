@@ -23,11 +23,23 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Role userRole = roleRepository.findByName("USER")
-                .orElseGet(() -> roleRepository.save(new Role(null, "USER")));
+        Role guestRole = roleRepository.findByRoleName("Guest")
+                .orElseGet(() -> roleRepository.save(new Role(null, "Guest", "Người dùng chưa đăng nhập hoặc truy cập giới hạn")));
 
-        Role adminRole = roleRepository.findByName("ADMIN")
-                .orElseGet(() -> roleRepository.save(new Role(null, "ADMIN")));
+        Role adminRole = roleRepository.findByRoleName("Admin")
+                .orElseGet(() -> roleRepository.save(new Role(null, "Admin", "Quản trị viên toàn quyền, cấp phát quyền và cấu hình hệ thống")));
+
+        Role memberRole = roleRepository.findByRoleName("Member")
+                .orElseGet(() -> roleRepository.save(new Role(null, "Member", "Thành viên đã đăng ký, có quyền truy cập khóa học và khảo sát")));
+
+        Role staffRole = roleRepository.findByRoleName("Staff")
+                .orElseGet(() -> roleRepository.save(new Role(null, "Staff", "Nhân viên hỗ trợ, xử lý phản hồi và tư vấn cơ bản")));
+
+        Role consultantRole = roleRepository.findByRoleName("Consultant")
+                .orElseGet(() -> roleRepository.save(new Role(null, "Consultant", "Chuyên viên tư vấn trực tiếp cho người dùng")));
+
+        Role managerRole = roleRepository.findByRoleName("Manager")
+                .orElseGet(() -> roleRepository.save(new Role(null, "Manager", "Quản lý hệ thống, giám sát hoạt động và báo cáo")));
 
         if (userRepository.findByEmail("john@example.com").isEmpty()) {
             User user = new User();
@@ -35,7 +47,7 @@ public class DataInitializer implements CommandLineRunner {
             user.setEmail("john@example.com");
             user.setFullName("John Doe");
             user.setPhone("0123456789");
-            user.setRole(userRole);
+            user.setRole(guestRole);
             user.setStatus(1);
             user.setPasswordHash(passwordEncoder.encode("123456"));
             userRepository.save(user);

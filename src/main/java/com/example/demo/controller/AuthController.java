@@ -67,8 +67,9 @@ public class AuthController {
             }
 
             // Lấy role USER mặc định
-            Role userRole = roleRepository.findByName("USER")
-                    .orElseGet(() -> roleRepository.save(new Role(null, "USER")));
+            Role userRole = roleRepository.findByRoleName("Member")
+                    .orElseGet(() -> roleRepository.save(new Role(null, "Member", "Thành viên đã đăng ký, có quyền truy cập khóa học và khảo sát")));
+
 
             // Tạo user mới
             User newUser = new User();
@@ -108,8 +109,9 @@ public class AuthController {
                 user = userOpt.get();
             } else {
                 // Nếu chưa có user, tạo mới
-                Role userRole = roleRepository.findByName("USER")
-                        .orElseGet(() -> roleRepository.save(new Role(null, "USER")));
+                Role userRole = roleRepository.findByRoleName("Member")
+                        .orElseGet(() -> roleRepository.save(new Role(null, "Member", "Thành viên đã đăng ký, có quyền truy cập khóa học và khảo sát")));
+
 
                 user = new User();
                 user.setEmail(email);

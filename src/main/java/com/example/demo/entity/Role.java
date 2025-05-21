@@ -8,33 +8,46 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "role_id")  // Đặt tên trường chính xác theo database
+    private Integer roleId;
 
-    @Column(unique = true, length = 50, nullable = false)
-    private String name;
+    @Column(name = "role_name", unique = true, length = 50, nullable = false)
+    private String roleName;
+
+    @Column(columnDefinition = "TEXT") // Mô tả có thể dài
+    private String description;
 
     public Role() {}
 
-    public Role(Integer id, String name) {
-        this.id = id;
-        this.name = name;
+    public Role(Integer roleId, String roleName, String description) {
+        this.roleId = roleId;
+        this.roleName = roleName;
+        this.description = description;
     }
 
     // Getter và Setter
 
-    public Integer getId() {
-        return id;
+    public Integer getRoleId() {
+        return roleId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 
-    public String getName() {
-        return name;
+    public String getRoleName() {
+        return roleName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
