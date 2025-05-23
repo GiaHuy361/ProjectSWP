@@ -1,13 +1,18 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+
 import { GoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
+import { Link, useNavigate } from "react-router-dom";
 
-const LoginForm = () => {
+
+const LoginForm = ({ onLoginSuccess,switchForm  }) => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
+   
 
   // Xử lý đăng nhập Google thành công
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -32,6 +37,8 @@ const LoginForm = () => {
       setMessage("Đăng nhập thành công bằng Google");
       setError(false);
       console.log("Login success:", data);
+        if (onLoginSuccess) onLoginSuccess();
+       navigate("/home");
     } catch (error) {
       setMessage("Lỗi kết nối server: " + error.message);
       setError(true);
@@ -44,16 +51,7 @@ const LoginForm = () => {
 
 
 
-  // Xử lý đăng nhập Facebook thành công
-  const handleFacebookResponse = async (response) => {
-    if (response.accessToken) {
-      console.log("Facebook token:", response.accessToken);
-      // TODO: Gửi token này lên backend để xác thực
-    } else {
-      setMessage("Đăng nhập Facebook thất bại");
-      setError(true);
-    }
-  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,8 +84,11 @@ const LoginForm = () => {
       });
 
       if (response.ok) {
+        navigate("/home");
         setMessage("Đăng nhập thành công");
         setError(false);
+         if (onLoginSuccess) onLoginSuccess();
+        
       } else {
         const err = await response.text();
         setMessage(`Lỗi: ${err || "Email hoặc mật khẩu không đúng"}`);
@@ -134,20 +135,7 @@ const LoginForm = () => {
         className="social-icons"
         style={{ display: "flex", justifyContent: "center", gap: "20px" }}
       >
-        <FacebookLogin
-          appId="YOUR_FACEBOOK_APP_ID" // Thay bằng App ID của bạn
-          autoLoad={false}
-          callback={handleFacebookResponse}
-          render={(renderProps) => (
-            <img
-              className="social-icon"
-              src="https://cdn-icons-png.flaticon.com/512/145/145802.png"
-              alt="Facebook"
-              onClick={renderProps.onClick}
-              style={{ cursor: "pointer", width: "40px", height: "40px" }}
-            />
-          )}
-        />
+       
 
         <GoogleLogin
           onSuccess={handleGoogleSuccess}
@@ -158,10 +146,20 @@ const LoginForm = () => {
         />
       </div>
 
-      <div className="login-footer-links">
-        <a href="/forgot-password">Quên mật khẩu?</a>
+       <div className="login-footer-links">
+        <span
+          onClick={() => switchForm && switchForm("forgotPassword")}
+          style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+        >
+          Quên mật khẩu?
+        </span>
         <span> | </span>
-        <Link to="/register">Tạo tài khoản mới</Link>
+        <span
+          onClick={() => switchForm && switchForm("register")}
+          style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+        >
+          Tạo tài khoản mới
+        </span>
       </div>
 
       {message && (
@@ -169,8 +167,11 @@ const LoginForm = () => {
           {message}
         </p>
       )}
+      
     </div>
+    
   );
+  
 };
 
 export default LoginForm;

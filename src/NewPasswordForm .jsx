@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
 
-const NewPasswordForm = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Lấy email và verificationCode từ location.state
-  const email = location.state?.email || "";
-  const verificationCode = location.state?.verificationCode || "";
-
+const NewPasswordForm = ({ switchForm, email, verificationCode }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -20,10 +12,10 @@ const NewPasswordForm = () => {
       setIsError(true);
       setMessage("Thiếu thông tin email hoặc mã xác minh. Vui lòng thực hiện lại từ đầu.");
       setTimeout(() => {
-        navigate("/forgot-password");
+        if (switchForm) switchForm("forgotPassword");
       }, 3000);
     }
-  }, [email, verificationCode, navigate]);
+  }, [email, verificationCode, switchForm]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,7 +52,9 @@ const NewPasswordForm = () => {
       if (response.ok) {
         setIsError(false);
         setMessage("Đổi mật khẩu thành công! Bạn sẽ được chuyển về trang đăng nhập.");
-        setTimeout(() => navigate("/"), 2000);
+        setTimeout(() => {
+          if (switchForm) switchForm("login");
+        }, 2000);
       } else {
         setIsError(true);
         setMessage(text || "Đổi mật khẩu thất bại.");
@@ -147,22 +141,7 @@ const NewPasswordForm = () => {
         </button>
       </form>
 
-      <div style={{ textAlign: "left" }}>
-        <Link
-          to="/"
-          style={{
-            color: "#333",
-            textDecoration: "none",
-            fontWeight: "600",
-            fontSize: "14px",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "5px",
-          }}
-        >
-          ← Quay lại đăng nhập
-        </Link>
-      </div>
+      
 
       {message && (
         <p

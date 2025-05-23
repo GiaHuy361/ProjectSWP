@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const ForgotPasswordForm = () => {
+const ForgotPasswordForm = ({ switchForm }) => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
@@ -27,18 +27,18 @@ const ForgotPasswordForm = () => {
 
       const text = await response.text();
 
+      // ...code cũ...
       if (response.ok) {
-        setMessage("Mã xác minh đã được gửi tới email của bạn.");
-        setError(false);
-
-        // Tự động chuyển sang trang nhập mã xác minh sau 1.5 giây
+        // Lưu email lên state cha qua switchForm
         setTimeout(() => {
-          navigate("/verify-code", { state: { email } });
+          switchForm("verify-code", { email });
         }, 1500);
       } else {
         setMessage(text || "Gửi mã xác minh thất bại");
         setError(true);
       }
+
+
     } catch (err) {
       setMessage("Lỗi kết nối server: " + err.message);
       setError(true);
@@ -100,21 +100,22 @@ const ForgotPasswordForm = () => {
         </button>
       </form>
 
-      <div style={{ marginTop: "20px", textAlign: "left" }}>
-        <Link
-          to="/"
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <button
+          type="button"
+          onClick={() => switchForm && switchForm("login")}
           style={{
-            color: "#333",
-            textDecoration: "none",
+            background: "none",
+            border: "none",
+            color: "blue",
             fontWeight: "600",
-            fontSize: "14px",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "5px",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: 0,
           }}
         >
-          <span style={{ fontSize: "18px" }}>♠</span> Quay trở lại đăng nhập
-        </Link>
+          ← Quay trở lại đăng nhập
+        </button>
       </div>
 
       {message && (

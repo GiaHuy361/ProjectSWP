@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./RegisterForm.css";
 
-const RegisterForm = () => {
+const RegisterForm = ({ onRegisterSuccess, switchForm }) => {
   // Thêm username và fullName
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
@@ -55,6 +55,11 @@ const RegisterForm = () => {
         setPassword("");
         setConfirmPassword("");
         setPhone("");
+
+        // Gọi callback onRegisterSuccess nếu có
+        if (onRegisterSuccess) {
+          onRegisterSuccess();
+        }
       } else {
         const err = await response.text();
         setMessage(`Lỗi: ${err || "Đăng ký thất bại"}`);
@@ -77,6 +82,7 @@ const RegisterForm = () => {
     <div className="register-container">
       <h2 className="register-title">Đăng ký tài khoản</h2>
       <form onSubmit={handleSubmit} className="register-form">
+        {/* Các input */}
         <input
           className="register-input"
           type="text"
@@ -115,6 +121,17 @@ const RegisterForm = () => {
         />
         <input
           className="register-input"
+          type="text"
+          placeholder="Nhập số điện thoại"
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            resetError();
+          }}
+          aria-label="Số điện thoại"
+        />
+        <input
+          className="register-input"
           type="password"
           placeholder="Nhập mật khẩu"
           value={password}
@@ -137,22 +154,25 @@ const RegisterForm = () => {
           required
           aria-label="Nhập lại mật khẩu"
         />
-        <input
-          className="register-input"
-          type="text"
-          placeholder="Nhập số điện thoại"
-          value={phone}
-          onChange={(e) => {
-            setPhone(e.target.value);
-            resetError();
-          }}
-          aria-label="Số điện thoại"
-        />
+
         <button type="submit" className="register-button">Đăng ký</button>
       </form>
 
-      <div className="login-footer-links">
-        <Link to="/">← Quay trở lại đăng nhập</Link>
+       <div className="login-footer-links" style={{ marginTop: "20px", textAlign: "center" }}>
+        <button
+          onClick={() => switchForm && switchForm("login")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "blue",
+            fontWeight: "600",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: 0,
+          }}
+        >
+          ← Quay trở lại đăng nhập
+        </button>
       </div>
 
       {message && (

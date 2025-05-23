@@ -1,37 +1,62 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
 
-const VerifyCodeForm = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const email = location.state?.email || "";
-
+const VerifyCodeForm = ({ switchForm, email }) => {
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [timer, setTimer] = useState(60); // 60 giây đếm ngược
+  const [timer, setTimer] = useState(60); // Thời gian đếm ngược (giây)
 
   useEffect(() => {
     if (timer <= 0) return;
-    const intervalId = setInterval(() => {
-      setTimer((t) => t - 1);
-    }, 1000);
-    return () => clearInterval(intervalId);
+    const interval = setInterval(() => setTimer(t => t - 1), 1000);
+    return () => clearInterval(interval);
   }, [timer]);
 
-  const handleResendCode = () => {
-    // Gọi API gửi lại mã xác minh tại đây
-    setTimer(60);
-    setMessage("Mã xác minh đã được gửi lại!");
+
+  const handleResendCode = async () => {
+    if (!email) {
+      setMessage("Email không tồn tại, không thể gửi lại mã.");
+      setError(true);
+      return;
+    }
+    setTimer(60); // reset timer khi gửi lại mã
+    setMessage("");
     setError(false);
+
+    try {
+      const response = await fetch("http://localhost:8080/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const text = await response.text();
+
+      if (response.ok) {
+        setMessage("Mã xác minh đã được gửi lại!");
+        setError(false);
+      } else {
+        setMessage(text || "Gửi lại mã xác minh thất bại.");
+        setError(true);
+      }
+    } catch (err) {
+      setMessage("Lỗi kết nối server: " + err.message);
+      setError(true);
+    }
   };
 
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
     setError(false);
     setMessage("");
+
+    if (!email) {
+      setMessage("Email không tồn tại, vui lòng nhập lại email.");
+      setError(true);
+      return;
+    }
 
     if (!code) {
       setMessage("Vui lòng nhập mã xác minh.");
@@ -49,7 +74,7 @@ const VerifyCodeForm = () => {
 
       if (response.ok) {
         setMessage("");
-        navigate("/new-password", { state: { email, verificationCode: code } });
+        switchForm("newPassword", { email, verificationCode: code });
       } else {
         const text = await response.text();
         setMessage(text || "Mã xác minh không hợp lệ hoặc đã hết hạn.");
@@ -84,7 +109,7 @@ const VerifyCodeForm = () => {
     >
       <h3 style={{ fontWeight: "bold", marginBottom: "25px" }}>Nhập mã</h3>
       <p style={{ fontSize: "14px", marginBottom: "30px" }}>
-        Chúng tôi đã gửi sms mã kích hoạt tới điện thoại của bạn
+        Chúng tôi đã gửi mã kích hoạt tới email của bạn
       </p>
 
       <form onSubmit={handleCodeSubmit}>
@@ -109,6 +134,7 @@ const VerifyCodeForm = () => {
             userSelect: "none",
           }}
           aria-label="Mã xác minh"
+          required
         />
         <button
           type="submit"
@@ -135,18 +161,36 @@ const VerifyCodeForm = () => {
 
       <button
         onClick={handleResendCode}
-        disabled={timer > 0}
+        disabled={timer > 0 || loading}
         style={{
           marginTop: "15px",
           border: "none",
           backgroundColor: "transparent",
-          color: timer > 0 ? "#aaa" : "#333",
-          cursor: timer > 0 ? "not-allowed" : "pointer",
+          color: timer > 0 || loading ? "#aaa" : "#333",
+          cursor: timer > 0 || loading ? "not-allowed" : "pointer",
           fontWeight: "600",
         }}
       >
         Gửi lại mã
       </button>
+
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <button
+          type="button"
+          onClick={() => switchForm("forgotPassword")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "blue",
+            fontWeight: "600",
+            cursor: "pointer",
+            textDecoration: "underline",
+            padding: 0,
+          }}
+        >
+          ← Quay trở lại nhập email
+        </button>
+      </div>
 
       {message && (
         <p
