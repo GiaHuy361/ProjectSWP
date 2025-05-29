@@ -1,0 +1,235 @@
+/* Container & layout */
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: #f0f7ff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  padding: 30px 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  font-weight: 700;
+  font-size: 18px;
+  color: #00496b;
+  line-height: 1.2;
+}
+
+.logoIcon {
+  font-size: 28px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #304656;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s;
+}
+
+.navItem:hover {
+  color: #1783ce;
+}
+
+.navIcon {
+  font-size: 18px;
+}
+
+/* Main section */
+.mainSection {
+  flex-grow: 1;
+  padding: 24px 60px; /* tăng padding trái phải cho thoáng */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header user */
+.header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 25px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1a3d2c;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Search & Filter */
+.searchFilter {
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  border-radius: 16px;
+  padding: 20px 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 15px rgb(16 185 129 / 0.4);
+}
+
+.searchInput {
+  flex-grow: 1;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+  background-color: white;
+  box-shadow: inset 0 0 6px rgb(0 0 0 / 0.1);
+}
+
+.searchInput::placeholder {
+  color: #a1a1aa;
+}
+
+.filterButtons {
+  display: flex;
+  gap: 15px;
+}
+
+.filterBtn {
+  background: #bbf7d0;
+  border: none;
+  border-radius: 25px;
+  padding: 8px 18px;
+  font-weight: 600;
+  color: #047857;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filterBtn:hover {
+  background: #34d399;
+  color: white;
+}
+
+.activeFilter {
+  background: linear-gradient(90deg, #34d399, #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgb(16 185 129 / 0.6);
+}
+
+/* Course list */
+.courseList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* Course card */
+.courseCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.1);
+  width: 100%;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box; /* thêm để padding không làm rộng vượt */
+}
+
+/* Badge colors */
+.badge {
+  display: inline-block;
+  padding: 6px 14px;
+  font-weight: 700;
+  border-radius: 20px;
+  color: white;
+  font-size: 13px;
+  margin-bottom: 14px;
+  width: fit-content;
+  user-select: none;
+}
+
+.hocsinh {
+  background-color: #34d399; /* xanh lá */
+}
+
+.sinhvien {
+  background-color: #3b82f6; /* xanh dương */
+}
+
+.phuhuynh {
+  background-color: #059669; /* xanh đậm */
+}
+
+.giaovien {
+  background-color: #047857; /* xanh đậm hơn */
+}
+
+/* Title */
+.title {
+  font-weight: 700;
+  font-size: 18px;
+  color: #1f2937;
+  margin-bottom: 14px;
+}
+
+/* Description */
+.description {
+  flex-grow: 1;
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+/* Info section */
+.info {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 20px;
+}
+
+/* Register button */
+.registerBtn {
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  border: none;
+  border-radius: 24px;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 14px 0;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.registerBtn:hover {
+  box-shadow: 0 8px 20px rgb(16 185 129 / 0.7);
+}
