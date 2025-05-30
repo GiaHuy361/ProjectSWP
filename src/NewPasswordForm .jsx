@@ -17,6 +17,97 @@ const NewPasswordForm = ({ switchForm, email, verificationCode }) => {
     }
   }, [email, verificationCode, switchForm]);
 
+  const styles = {
+    container: {
+      maxWidth: "400px",
+      margin: "100px auto",
+      backgroundColor: "#fff",
+      borderRadius: "10px",
+      padding: "40px 30px",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      color: "#333",
+      textAlign: "center",
+      userSelect: "none",
+    },
+    title: {
+      fontWeight: "700",
+      fontSize: "28px",
+      marginBottom: "25px",
+      color: "#2a9d8f",
+      letterSpacing: "0.4px",
+    },
+    subtitle: {
+      fontSize: "14px",
+      marginBottom: "30px",
+      color: "#555",
+      userSelect: "text",
+    },
+    input: {
+      width: "100%",
+      padding: "14px 16px",
+      fontSize: "16px",
+      borderRadius: "8px",
+      border: "1.5px solid #ccc",
+      boxSizing: "border-box",
+      outlineOffset: "2px",
+      fontWeight: "600",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+      color: "#222",
+      backgroundColor: "#fafafa",
+      marginBottom: "20px",
+    },
+    inputFocus: {
+      borderColor: "#2a9d8f",
+      boxShadow: "0 0 8px rgba(42, 157, 143, 0.4)",
+      backgroundColor: "#fff",
+    },
+    button: {
+      width: "100%",
+      padding: "16px 0",
+      borderRadius: "8px",
+      backgroundColor: "#2a9d8f",
+      color: "#fff",
+      fontWeight: "700",
+      fontSize: "18px",
+      border: "none",
+      cursor: "pointer",
+      boxShadow: "0 4px 12px rgba(42, 157, 143, 0.6)",
+      transition: "background-color 0.3s ease, box-shadow 0.3s ease",
+      userSelect: "none",
+      marginBottom: "20px",
+    },
+    buttonDisabled: {
+      backgroundColor: "#888",
+      cursor: "not-allowed",
+      boxShadow: "none",
+    },
+    message: {
+      marginTop: "25px",
+      fontWeight: "700",
+      fontSize: "16px",
+      userSelect: "none",
+    },
+    error: {
+      color: "#d93025",
+    },
+    success: {
+      color: "#188038",
+    },
+  };
+
+  const handleFocus = (e) => {
+    e.currentTarget.style.borderColor = styles.inputFocus.borderColor;
+    e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow;
+    e.currentTarget.style.backgroundColor = styles.inputFocus.backgroundColor;
+  };
+  const handleBlur = (e) => {
+    e.currentTarget.style.borderColor = styles.input.border;
+    e.currentTarget.style.boxShadow = "none";
+    e.currentTarget.style.backgroundColor = styles.input.backgroundColor;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsError(false);
@@ -27,7 +118,6 @@ const NewPasswordForm = ({ switchForm, email, verificationCode }) => {
       setMessage("Vui lòng nhập đầy đủ mật khẩu.");
       return;
     }
-
     if (password !== confirmPassword) {
       setIsError(true);
       setMessage("Mật khẩu nhập lại không khớp.");
@@ -40,11 +130,7 @@ const NewPasswordForm = ({ switchForm, email, verificationCode }) => {
       const response = await fetch("http://localhost:8080/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          verificationCode,
-          newPassword: password,
-        }),
+        body: JSON.stringify({ email, verificationCode, newPassword: password }),
       });
 
       const text = await response.text();
@@ -68,23 +154,9 @@ const NewPasswordForm = ({ switchForm, email, verificationCode }) => {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "320px",
-        margin: "100px auto",
-        backgroundColor: "#f0f0f0",
-        borderRadius: "20px",
-        padding: "40px 30px",
-        fontFamily: "'Roboto Slab', serif",
-        color: "#333",
-        textAlign: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-      }}
-    >
-      <h3 style={{ fontWeight: "bold", marginBottom: "25px" }}>Hoàn tất</h3>
-      <p style={{ marginBottom: "30px", fontSize: "14px", color: "#555" }}>
-        Vui lòng nhập mật khẩu mới của bạn
-      </p>
+    <div style={styles.container}>
+      <h3 style={styles.title}>Hoàn tất</h3>
+      <p style={styles.subtitle}>Vui lòng nhập mật khẩu mới của bạn</p>
       <form onSubmit={handleSubmit}>
         <input
           type="password"
@@ -92,16 +164,9 @@ const NewPasswordForm = ({ switchForm, email, verificationCode }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={loading}
-          style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: "15px",
-            border: "none",
-            backgroundColor: "#ddd",
-            color: "#333",
-            marginBottom: "20px",
-            fontWeight: "600",
-          }}
+          style={styles.input}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           aria-label="Mật khẩu mới"
         />
         <input
@@ -110,45 +175,28 @@ const NewPasswordForm = ({ switchForm, email, verificationCode }) => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           disabled={loading}
-          style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: "15px",
-            border: "none",
-            backgroundColor: "#ddd",
-            color: "#333",
-            marginBottom: "30px",
-            fontWeight: "600",
-          }}
+          style={styles.input}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           aria-label="Nhập lại mật khẩu mới"
         />
         <button
           type="submit"
           disabled={loading}
           style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: "15px",
-            backgroundColor: loading ? "#888" : "#333",
-            color: "#fff",
-            fontWeight: "600",
-            border: "none",
-            cursor: loading ? "not-allowed" : "pointer",
-            marginBottom: "20px",
+            ...styles.button,
+            ...(loading ? styles.buttonDisabled : {}),
           }}
         >
           {loading ? "Đang xử lý..." : "Hoàn tất"}
         </button>
       </form>
 
-      
-
       {message && (
         <p
           style={{
-            marginTop: "25px",
-            color: isError ? "red" : "green",
-            fontWeight: "600",
+            ...styles.message,
+            ...(isError ? styles.error : styles.success),
           }}
         >
           {message}
