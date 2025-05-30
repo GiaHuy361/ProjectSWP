@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "roles")
@@ -16,6 +17,10 @@ public class Role {
 
     @Column(columnDefinition = "TEXT") // Mô tả có thể dài
     private String description;
+
+    // Quan hệ nhiều-nhiều với User
+    @ManyToMany(mappedBy = "roles")  // mappedBy trùng với tên biến roles trong User
+    private Set<User> users;
 
     public Role() {}
 
@@ -49,5 +54,13 @@ public class Role {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }

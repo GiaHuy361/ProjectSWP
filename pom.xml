@@ -122,9 +122,13 @@
 			<artifactId>google-http-client-jackson2</artifactId>
 			<version>1.43.2</version>
 		</dependency>
+		<!-- Spring Boot Starter Data JPA (đã bao gồm Hibernate và Transaction support) -->
 
-
-
+		<dependency>
+			<groupId>jakarta.transaction</groupId>
+			<artifactId>jakarta.transaction-api</artifactId>
+			<version>2.0.0</version>
+		</dependency>
 
 
 

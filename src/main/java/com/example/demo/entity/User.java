@@ -1,12 +1,13 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
 public class User {
 
-    // Tên cột trong DB là user_id, nên phải chỉ rõ tên này cho Hibernate
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -27,10 +28,6 @@ public class User {
     @Column(length = 20)
     private String phone;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
-
     @Column(nullable = false)
     private Integer status;
 
@@ -40,9 +37,19 @@ public class User {
     @Column(name = "login_type", nullable = false)
     private String loginType = "local";
 
+    // Quan hệ nhiều-nhiều với Role qua bảng trung gian user_roles
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
     public User() {}
 
-    // Getters và Setters
+    // Getter và Setter
+
     public Long getId() {
         return id;
     }
@@ -51,7 +58,8 @@ public class User {
         this.id = id;
     }
 
-    // Các getter/setter còn lại giữ nguyên
+    // Các getter/setter khác
+
     public String getUsername() {
         return username;
     }
@@ -92,14 +100,6 @@ public class User {
         this.phone = phone;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
     public Integer getStatus() {
         return status;
     }
@@ -123,4 +123,23 @@ public class User {
     public void setLoginType(String loginType) {
         this.loginType = loginType;
     }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    private UserProfile userProfile;
+
+    public UserProfile getUserProfile() {
+        return userProfile;
+    }
+
+    public void setUserProfile(UserProfile userProfile) {
+        this.userProfile = userProfile;
+    }
+
 }

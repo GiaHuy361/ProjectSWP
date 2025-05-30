@@ -8,6 +8,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -41,27 +44,37 @@ public class DataInitializer implements CommandLineRunner {
         Role managerRole = roleRepository.findByRoleName("Manager")
                 .orElseGet(() -> roleRepository.save(new Role(null, "Manager", "Quản lý hệ thống, giám sát hoạt động và báo cáo")));
 
+        // Tạo user guest với role Guest
         if (userRepository.findByEmail("john@example.com").isEmpty()) {
             User user = new User();
             user.setUsername("john_doe");
             user.setEmail("john@example.com");
             user.setFullName("John Doe");
             user.setPhone("0123456789");
-            user.setRole(guestRole);
             user.setStatus(1);
             user.setPasswordHash(passwordEncoder.encode("123456"));
+
+            Set<Role> roles = new HashSet<>();
+            roles.add(guestRole);
+            user.setRoles(roles);
+
             userRepository.save(user);
         }
 
+        // Tạo user admin với role Admin
         if (userRepository.findByEmail("admin@example.com").isEmpty()) {
             User admin = new User();
             admin.setUsername("admin");
             admin.setEmail("admin@example.com");
             admin.setFullName("Admin User");
             admin.setPhone("0987654321");
-            admin.setRole(adminRole);
             admin.setStatus(1);
             admin.setPasswordHash(passwordEncoder.encode("123456"));
+
+            Set<Role> roles = new HashSet<>();
+            roles.add(adminRole);
+            admin.setRoles(roles);
+
             userRepository.save(admin);
         }
 
