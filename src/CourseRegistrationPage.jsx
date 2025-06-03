@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './CourseRegistrationPage.module.css';
@@ -21,9 +22,10 @@ export default function CourseRegistrationPage() {
   const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const [permissions, setPermissions] = useState([]); // Thêm state permissions
   const [registering, setRegistering] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // State cho trang hiện tại
-  const itemsPerPage = 5; // Số khóa học trên mỗi trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,18 +36,21 @@ export default function CourseRegistrationPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setUser({ userId: data.userId, email: data.email, roles: data.roles });
+        setUser({ userId: data.userId, email: data.email, permissions: data.permissions || [] });
+        setPermissions(data.permissions || []); // Lấy permissions từ API
         localStorage.setItem('email', data.email);
         return true;
       }
       localStorage.removeItem('email');
       setUser(null);
+      setPermissions([]); // Reset permissions nếu không đăng nhập
       setRegisteredCourses([]);
       return false;
     } catch (err) {
       console.error('Error checking login status:', err);
       localStorage.removeItem('email');
       setUser(null);
+      setPermissions([]);
       setRegisteredCourses([]);
       return false;
     }
@@ -72,6 +77,7 @@ export default function CourseRegistrationPage() {
 
     const handleLogoutSuccess = () => {
       setUser(null);
+      setPermissions([]); // Reset permissions khi logout
       setRegisteredCourses([]);
       navigate('/home');
     };
@@ -162,18 +168,16 @@ export default function CourseRegistrationPage() {
     return matchSearch && matchFilter;
   });
 
-  // Tính toán phân trang
   const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentCourses = filteredCourses.slice(startIndex, endIndex);
 
-  // Reset currentPage về 1 khi filteredCourses thay đổi (do search hoặc filter)
   useEffect(() => {
     setCurrentPage(1);
   }, [search, filter]);
 
-  const canRegister = user && user.roles && ['Student', 'Member', 'Parent'].some((role) => user.roles.includes(role));
+  const canRegister = user && permissions.includes('register_course'); // Kiểm tra quyền register_course
 
   const handleRegister = async (course) => {
     if (!user) {
@@ -307,7 +311,6 @@ export default function CourseRegistrationPage() {
             ))
           )}
         </div>
-        {/* Thêm giao diện phân trang */}
         {totalPages > 1 && (
           <div className={styles.pagination}>
             <button

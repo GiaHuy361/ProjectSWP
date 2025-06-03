@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -15,6 +15,7 @@ import ShowLoginModal from './showLoginModal';
 function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [permissions, setPermissions] = useState([]);
 
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
@@ -22,6 +23,33 @@ function App() {
     setIsLoggedIn(true);
     setIsLoginModalOpen(false);
   };
+
+  // Đồng bộ isLoggedIn và permissions từ API /api/auth/user
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/auth/user', {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(true);
+          setPermissions(data.permissions || []);
+          localStorage.setItem('permissions', JSON.stringify(data.permissions || []));
+        } else {
+          setIsLoggedIn(false);
+          setPermissions([]);
+          localStorage.removeItem('permissions');
+        }
+      } catch (error) {
+        console.error('Error checking login status:', error);
+        setIsLoggedIn(false);
+        setPermissions([]);
+        localStorage.removeItem('permissions');
+      }
+    };
+    checkLoginStatus();
+  }, []);
 
   return (
     <GoogleOAuthProvider clientId='964232858341-5tr0k7mju0l31mg9amdlvf74eacau5tr.apps.googleusercontent.com'>
@@ -32,7 +60,16 @@ function App() {
           <Routes>
             <Route path='/' element={<Navigate to='/home' replace />} />
             <Route path='/home' element={<HomePage />} />
-            <Route path='/course-registration' element={<CourseRegistrationPage />} />
+            <Route
+              path='/course-registration'
+              element={
+                permissions.includes('register_course') ? (
+                  <CourseRegistrationPage />
+                ) : (
+                  <Navigate to='/home' replace />
+                )
+              }
+            />
             <Route
               path='/login'
               element={

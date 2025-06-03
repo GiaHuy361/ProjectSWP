@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Box,
@@ -77,7 +78,7 @@ const UserProfile = ({ user, onClose, loading, error }) => {
             <Typography>
               <strong>Phone:</strong> {user.phone || "Chưa cập nhật"}
             </Typography>
-             <Typography>
+            <Typography>
               <strong>Vai trò:</strong>{" "}
               {user.roles && user.roles.length > 0 
                 ? user.roles.join(", ") 
@@ -92,7 +93,6 @@ const UserProfile = ({ user, onClose, loading, error }) => {
             <Typography>
               <strong>Trường học:</strong> {user.schoolName || "Chưa cập nhật"}
             </Typography>
-           
           </Stack>
           <Button variant="contained" onClick={onClose} sx={{ mt: 4 }} fullWidth>
             Đóng

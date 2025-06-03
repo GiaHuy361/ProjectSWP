@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 
 const VerifyCodeForm = ({ switchForm, email }) => {
@@ -72,6 +73,17 @@ const VerifyCodeForm = ({ switchForm, email }) => {
       });
 
       if (response.ok) {
+        // Lấy permissions từ API /api/auth/user sau khi xác minh mã
+        const userResponse = await fetch('http://localhost:8080/api/auth/user', {
+          credentials: 'include',
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          localStorage.setItem('permissions', JSON.stringify(userData.permissions || []));
+        } else {
+          localStorage.removeItem('permissions');
+        }
+
         setMessage("");
         switchForm("newPassword", { email, verificationCode: code });
       } else {

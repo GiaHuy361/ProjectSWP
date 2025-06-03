@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Paper,
@@ -55,6 +56,17 @@ const RegisterForm = ({ onRegisterSuccess, switchForm }) => {
       });
 
       if (response.ok) {
+        // Lấy permissions từ API /api/auth/user sau khi đăng ký
+        const userResponse = await fetch('http://localhost:8080/api/auth/user', {
+          credentials: 'include',
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          localStorage.setItem('permissions', JSON.stringify(userData.permissions || []));
+        } else {
+          localStorage.removeItem('permissions');
+        }
+
         setMessage("Đăng ký thành công! Vui lòng đăng nhập.");
         setError(false);
         setUsername("");
@@ -334,5 +346,4 @@ const RegisterForm = ({ onRegisterSuccess, switchForm }) => {
     </Paper>
   );
 };
-
 export default RegisterForm;

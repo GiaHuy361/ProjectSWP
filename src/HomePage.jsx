@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./HomePage.module.css";
 
@@ -10,10 +11,10 @@ const stats = [
 ];
 
 const actions = [
-  { title: "Đăng ký khóa học", colorClass: styles.actionBlue },
-  { title: "Làm khảo sát", colorClass: styles.actionGreen },
-  { title: "Đặt lịch hẹn", colorClass: styles.actionYellow },
-  { title: "Xem báo cáo", colorClass: styles.actionBlue },
+  { title: "Đăng ký khóa học", colorClass: styles.actionBlue, permission: "register_course", path: "/course-registration" },
+  { title: "Làm khảo sát", colorClass: styles.actionGreen, permission: "take_survey", path: "/survey" },
+  { title: "Đặt lịch hẹn", colorClass: styles.actionYellow, permission: "book_appointment", path: "/appointment" },
+  { title: "Xem báo cáo", colorClass: styles.actionBlue, permission: "view_reports", path: "/reports" },
 ];
 
 const articles = [
@@ -51,6 +52,41 @@ const articles = [
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [permissions, setPermissions] = useState([]);
+
+  // Hàm lấy permissions từ API
+  const fetchPermissions = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/user', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPermissions(data.permissions || []);
+      } else {
+        setPermissions([]);
+      }
+    } catch (error) {
+      console.error('Error fetching permissions:', error);
+      setPermissions([]);
+    }
+  };
+
+  // Lấy permissions khi trang tải lần đầu
+  useEffect(() => {
+    fetchPermissions();
+  }, []);
+
+  // Lắng nghe sự kiện loginSuccess để reload trang
+  useEffect(() => {
+    const handleLoginSuccess = () => {
+      // Reload trang để cập nhật permissions
+      window.location.reload();
+    };
+
+    window.addEventListener('loginSuccess', handleLoginSuccess);
+    return () => window.removeEventListener('loginSuccess', handleLoginSuccess);
+  }, []);
 
   return (
     <div className={styles.homepageContainer}>
@@ -85,19 +121,21 @@ const HomePage = () => {
       {/* Action buttons */}
       <div className={styles.actionsContainer}>
         {actions.map((action, index) => (
-          <button
-            key={index}
-            className={`${styles.actionBtn} ${action.colorClass}`}
-            onClick={() => {
-              if (action.title === "Đăng ký khóa học") {
-                navigate("/course-registration");
-              } else {
-                alert(`Bạn bấm vào: ${action.title}`);
-              }
-            }}
-          >
-            {action.title}
-          </button>
+          permissions.includes(action.permission) && (
+            <button
+              key={index}
+              className={`${styles.actionBtn} ${action.colorClass}`}
+              onClick={() => {
+                if (action.path) {
+                  navigate(action.path);
+                } else {
+                  alert(`Bạn bấm vào: ${action.title}`);
+                }
+              }}
+            >
+              {action.title}
+            </button>
+          )
         ))}
       </div>
 

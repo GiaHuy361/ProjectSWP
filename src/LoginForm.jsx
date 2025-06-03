@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Box, Paper, Typography, TextField, Button, Stack, Alert, Divider } from '@mui/material';
 import { GoogleLogin } from '@react-oauth/google';
@@ -29,11 +30,15 @@ const LoginForm = ({ onLoginSuccess, switchForm }) => {
       }
 
       const data = await response.json();
-      if (data.roles) {
-        const roleNames = data.roles.map((role) => role.roleName || role);
-        localStorage.setItem('roles', JSON.stringify(roleNames));
+      // Lấy permissions từ API /api/auth/user
+      const userResponse = await fetch('http://localhost:8080/api/auth/user', {
+        credentials: 'include',
+      });
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        localStorage.setItem('permissions', JSON.stringify(userData.permissions || []));
       } else {
-        localStorage.removeItem('roles');
+        localStorage.removeItem('permissions');
       }
       if (data.fullName) localStorage.setItem('userName', data.fullName);
       if (data.email) localStorage.setItem('email', data.email);
@@ -52,8 +57,8 @@ const LoginForm = ({ onLoginSuccess, switchForm }) => {
       setMessage('Đăng nhập thành công bằng Google');
       setError(false);
 
-      window.dispatchEvent(new Event('loginSuccess')); // Thêm sự kiện
-
+      window.dispatchEvent(new Event('loginSuccess'));
+      window.location.reload();
       if (onLoginSuccess) {
         onLoginSuccess();
         navigate('/home');
@@ -72,63 +77,71 @@ const LoginForm = ({ onLoginSuccess, switchForm }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(false);
-    setMessage('');
-    setLoading(true);
+  e.preventDefault();
+  setError(false);
+  setMessage('');
+  setLoading(true);
 
-    if (!email || !password) {
-      setMessage('Vui lòng nhập email và mật khẩu.');
-      setError(true);
-      setLoading(false);
-      return;
-    }
+  if (!email || !password) {
+    setMessage('Vui lòng nhập email và mật khẩu.');
+    setError(true);
+    setLoading(false);
+    return;
+  }
 
-    try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const userResponse = await fetch('http://localhost:8080/api/auth/user', {
         credentials: 'include',
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.roles) localStorage.setItem('roles', JSON.stringify(data.roles));
-        else localStorage.removeItem('roles');
-        if (data.fullName) localStorage.setItem('userName', data.fullName);
-        if (data.email) localStorage.setItem('email', data.email);
-
-        const profileResponse = await fetch(
-          `http://localhost:8080/api/auth/profile?email=${encodeURIComponent(data.email)}`,
-          { credentials: 'include' }
-        );
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          localStorage.setItem('userType', profileData.userType || '');
-          localStorage.setItem('dateOfBirth', profileData.dateOfBirth || '');
-          localStorage.setItem('phone', profileData.phone || '');
-        }
-
-        setMessage('Đăng nhập thành công');
-        setError(false);
-
-        window.dispatchEvent(new Event('loginSuccess')); // Thêm sự kiện
-
-        if (onLoginSuccess) onLoginSuccess();
-        navigate('/home');
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        localStorage.setItem('permissions', JSON.stringify(userData.permissions || []));
       } else {
-        const err = await response.text();
-        setMessage(`Lỗi: ${err || 'Email hoặc mật khẩu không đúng'}`);
-        setError(true);
+        localStorage.removeItem('permissions');
       }
-    } catch (error) {
-      setMessage('Lỗi kết nối server: ' + error.message);
+      if (data.fullName) localStorage.setItem('userName', data.fullName);
+      if (data.email) localStorage.setItem('email', data.email);
+
+      const profileResponse = await fetch(
+        `http://localhost:8080/api/auth/profile?email=${encodeURIComponent(data.email)}`,
+        { credentials: 'include' }
+      );
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        localStorage.setItem('userType', profileData.userType || '');
+        localStorage.setItem('dateOfBirth', profileData.dateOfBirth || '');
+        localStorage.setItem('phone', profileData.phone || '');
+      }
+
+      setMessage('Đăng nhập thành công');
+      setError(false);
+
+      window.dispatchEvent(new Event('loginSuccess'));
+      window.location.reload(); // Thêm dòng này để reload trang
+
+      if (onLoginSuccess) onLoginSuccess();
+      navigate('/home');
+    } else {
+      const err = await response.text();
+      setMessage(`Lỗi: ${err || 'Email hoặc mật khẩu không đúng'}`);
       setError(true);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    setMessage('Lỗi kết nối server: ' + error.message);
+    setError(true);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Paper

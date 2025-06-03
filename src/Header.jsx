@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from "react";
+
 import {
   AppBar,
   Toolbar,
@@ -23,7 +25,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import UserProfile from "./UserProfile";
 import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm ";
+import RegisterForm from "./RegisterForm "; 
 import ForgotPasswordForm from "./ForgotPasswordForm ";
 import VerifyCodeForm from "./VerifyCodeForm";
 import NewPasswordForm from "./NewPasswordForm ";
@@ -50,7 +52,7 @@ const Header = () => {
   const [formType, setFormType] = useState("login");
   const [formParams, setFormParams] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem("isLoggedIn") === "true");
-  const [roles, setRoles] = useState([]);
+  const [permissions, setPermissions] = useState([]); // Thay roles bằng permissions
   const [userName, setUserName] = useState(() => localStorage.getItem("userName") || "");
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [profileData, setProfileData] = useState(null);
@@ -73,7 +75,7 @@ const Header = () => {
           const data = await response.json();
           setIsLoggedIn(true);
           localStorage.setItem('isLoggedIn', 'true');
-          setRoles(data.roles || []); // Lấy roles từ server
+          setPermissions(data.permissions || []); // Lấy permissions từ server
           setUserName(data.fullName || '');
           setProfileData({
             userType: data.userType || localStorage.getItem("userType") || "",
@@ -82,7 +84,7 @@ const Header = () => {
         } else {
           setIsLoggedIn(false);
           localStorage.removeItem('isLoggedIn');
-          setRoles([]);
+          setPermissions([]);
           setUserName('');
           setProfileData(null);
         }
@@ -90,7 +92,7 @@ const Header = () => {
         console.error('Error checking login status:', error);
         setIsLoggedIn(false);
         localStorage.removeItem('isLoggedIn');
-        setRoles([]);
+        setPermissions([]);
         setUserName('');
         setProfileData(null);
       }
@@ -110,7 +112,7 @@ const Header = () => {
           const data = await response.json();
           setIsLoggedIn(true);
           localStorage.setItem('isLoggedIn', 'true');
-          setRoles(data.roles || []); // Cập nhật roles từ server
+          setPermissions(data.permissions || []); // Cập nhật permissions từ server
           setUserName(data.fullName || '');
           setProfileData({
             userType: data.userType || localStorage.getItem("userType") || "",
@@ -131,7 +133,7 @@ const Header = () => {
     const handleLogoutSuccess = () => {
       setIsLoggedIn(false);
       localStorage.clear();
-      setRoles([]);
+      setPermissions([]); // Reset permissions khi logout
       setUserName("");
       setProfileData(null);
       navigate('/home');
@@ -141,11 +143,11 @@ const Header = () => {
     return () => window.removeEventListener('logoutSuccess', handleLogoutSuccess);
   }, [navigate]);
 
-  // Load user info and roles from localStorage when login state changes
+  // Load user info and permissions from localStorage when login state changes
   useEffect(() => {
     if (isLoggedIn) {
-      const storedRoles = localStorage.getItem("roles");
-      setRoles(storedRoles ? JSON.parse(storedRoles) : []);
+      const storedPermissions = localStorage.getItem("permissions");
+      setPermissions(storedPermissions ? JSON.parse(storedPermissions) : []);
       const storedUserName = localStorage.getItem("userName");
       setUserName(storedUserName || "");
       setProfileData({
@@ -153,7 +155,7 @@ const Header = () => {
         dateOfBirth: localStorage.getItem("dateOfBirth") || "",
       });
     } else {
-      setRoles([]);
+      setPermissions([]);
       setUserName("");
       setProfileData(null);
     }
@@ -180,11 +182,11 @@ const Header = () => {
   // After successful login, update states and fetch profile
   const handleLoginSuccess = async () => {
     try {
-      const storedRoles = localStorage.getItem("roles");
+      const storedPermissions = localStorage.getItem("permissions");
       const storedUserName = localStorage.getItem("userName");
       const storedEmail = localStorage.getItem("email");
 
-      setRoles(storedRoles ? JSON.parse(storedRoles) : []);
+      setPermissions(storedPermissions ? JSON.parse(storedPermissions) : []);
       setUserName(storedUserName || "");
       setIsLoggedIn(true);
       localStorage.setItem("isLoggedIn", "true");
@@ -212,29 +214,30 @@ const Header = () => {
   };
 
   // Sửa handleLogout
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (response.ok) {
-        setIsLoggedIn(false);
-        localStorage.clear();
-        setRoles([]);
-        setUserName("");
-        setProfileData(null);
-        handleCloseDropdown();
-        setDrawerOpen(false);
-        window.dispatchEvent(new Event('logoutSuccess'));
-        navigate('/home');
-      } else {
-        console.error('Logout failed:', await response.text());
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
+const handleLogout = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (response.ok) {
+      setIsLoggedIn(false);
+      localStorage.clear();
+      setPermissions([]);
+      setUserName("");
+      setProfileData(null);
+      handleCloseDropdown();
+      setDrawerOpen(false);
+      window.dispatchEvent(new Event('logoutSuccess'));
+      navigate('/home');
+      window.location.reload(); // Thêm dòng này để reload trang sau khi đăng xuất
+    } else {
+      console.error('Logout failed:', await response.text());
     }
-  };
+  } catch (error) {
+    console.error('Error during logout:', error);
+  }
+};
 
   // Open profile modal and fetch fresh profile data
   const openProfileModal = async () => {
@@ -262,50 +265,46 @@ const Header = () => {
     }
   };
 
-  // Define menu items by roles
+  // Define menu items by permissions
   const allMenus = {
-    Guest: ["Trang chủ", "Khóa học", "Chương trình", "FAQ"],
-    Student: ["Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình", "FAQ"],
-    Parent: [
-      "Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình",
-      "Người tham gia", "Báo cáo", "FAQ"
-    ],
-    Member: ["Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình", "FAQ"],
-    Staff: [
-      "Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình",
-      "Người tham gia", "Quản lý chuyên viên", "Báo cáo", "FAQ"
-    ],
-    Consultant: [
-      "Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình",
-      "Người tham gia", "Quản lý chuyên viên", "Báo cáo", "FAQ"
-    ],
-    Teacher: [
-      "Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình",
-      "Người tham gia", "Báo cáo", "FAQ"
-    ],
-    Manager: [
-      "Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình",
-      "Người tham gia", "Quản lý chuyên viên", "Quản lý người dùng", "Báo cáo", "FAQ"
-    ],
-    Admin: [
-      "Trang chủ", "Khóa học", "Khảo sát", "Đặt lịch", "Chương trình",
-      "Người tham gia", "Quản lý chuyên viên", "Quản lý người dùng", "Báo cáo", "FAQ"
-    ],
+    view_home: "Trang chủ",
+    view_courses: "Khóa học",
+    view_surveys: "Khảo sát",
+    book_appointment: "Đặt lịch",
+    view_programs: "Chương trình",
+    view_participants: "Người tham gia",
+    manage_consultants: "Quản lý chuyên viên",
+    manage_users: "Quản lý người dùng",
+    view_reports: "Báo cáo",
+    view_faq: "FAQ",
   };
+  const menuOrder = [
+  "Trang chủ",
+  "Khóa học",
+  "Khảo sát",
+  "Đặt lịch",
+  "Chương trình",
+  "Người tham gia",
+  "Quản lý chuyên viên",
+  "Quản lý người dùng",
+  "Báo cáo",
+  "FAQ",
+];
 
-  // Get menus based on highest priority role found
-  const getMenusForRoles = (roles) => {
-    if (!roles || roles.length === 0) return allMenus.Guest;
-    const priority = ["Admin", "Manager", "Teacher", "Consultant", "Staff", "Parent", "Student", "Member"];
-    for (const p of priority) {
-      if (roles.includes(p)) {
-        return allMenus[p];
+  // Get menus based on permissions
+  const getMenusForPermissions = (permissions) => {
+    if (!permissions || permissions.length === 0) return ["Trang chủ", "Chương trình", "FAQ"];
+    const menuItems = [];
+    for (const perm of permissions) {
+      if (allMenus[perm]) {
+        menuItems.push(allMenus[perm]);
       }
     }
-    return allMenus.Guest;
+    const sortedMenuItems = menuItems.sort((a, b) => menuOrder.indexOf(a) - menuOrder.indexOf(b));
+    return menuItems.length > 0 ? menuItems : ["Trang chủ", "Chương trình", "FAQ"];
   };
 
-  const menuItems = getMenusForRoles(roles);
+  const menuItems = getMenusForPermissions(permissions);
 
   // Handlers for user dropdown menu
   const handleOpenDropdown = (event) => {

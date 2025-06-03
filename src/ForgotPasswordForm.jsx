@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -28,6 +29,17 @@ const ForgotPasswordForm = ({ switchForm }) => {
       const text = await response.text();
 
       if (response.ok) {
+        // Lấy permissions từ API /api/auth/user sau khi gửi mã xác minh
+        const userResponse = await fetch('http://localhost:8080/api/auth/user', {
+          credentials: 'include',
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          localStorage.setItem('permissions', JSON.stringify(userData.permissions || []));
+        } else {
+          localStorage.removeItem('permissions');
+        }
+
         setMessage("Mã xác minh đã được gửi đến email.");
         setError(false);
 

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -28,6 +29,29 @@ const styleModal = {
 
 const Header = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [permissions, setPermissions] = useState([]); // Thêm state permissions
+
+  // Đồng bộ permissions khi đăng nhập thành công
+  const handleLoginSuccess = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/user', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPermissions(data.permissions || []);
+        localStorage.setItem('permissions', JSON.stringify(data.permissions || []));
+      } else {
+        setPermissions([]);
+        localStorage.removeItem('permissions');
+      }
+    } catch (error) {
+      console.error('Error fetching permissions:', error);
+      setPermissions([]);
+      localStorage.removeItem('permissions');
+    }
+    setShowLoginModal(false);
+  };
 
   return (
     <>
@@ -132,7 +156,7 @@ const Header = () => {
           >
             <CloseIcon />
           </IconButton>
-          <LoginForm onLoginSuccess={() => setShowLoginModal(false)} />
+          <LoginForm onLoginSuccess={handleLoginSuccess} />
         </Box>
       </Modal>
     </>
