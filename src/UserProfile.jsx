@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Box,
@@ -21,14 +20,14 @@ const stylePaper = {
 };
 
 const UserProfile = ({ user, onClose, loading, error }) => {
-  console.log("User data:", user); // Log để debug
+  console.log("User data:", user);
 
   // Hàm kiểm tra và định dạng ngày sinh an toàn
   const formatDate = (dateStr) => {
-    if (!dateStr) return "Chưa cập nhật";
+    if (!dateStr || dateStr === "Chưa cập nhật") return "Chưa cập nhật";
     try {
       const date = new Date(dateStr);
-      return date.toLocaleDateString("vi-VN"); // Định dạng theo kiểu Việt Nam
+      return date.toLocaleDateString("vi-VN");
     } catch (e) {
       console.error("Invalid date format:", dateStr, e);
       return "Chưa cập nhật";
@@ -80,8 +79,8 @@ const UserProfile = ({ user, onClose, loading, error }) => {
             </Typography>
             <Typography>
               <strong>Vai trò:</strong>{" "}
-              {user.roles && user.roles.length > 0 
-                ? user.roles.join(", ") 
+              {Array.isArray(user.roles) && user.roles.length > 0
+                ? user.roles.join(", ")
                 : "Chưa có vai trò"}
             </Typography>
             <Typography>
@@ -98,7 +97,19 @@ const UserProfile = ({ user, onClose, loading, error }) => {
             Đóng
           </Button>
         </>
-      ) : null}
+      ) : (
+        <>
+          <Typography variant="h5" gutterBottom color="error">
+            Lỗi
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            Không tìm thấy thông tin người dùng.
+          </Typography>
+          <Button variant="contained" onClick={onClose} fullWidth>
+            Đóng
+          </Button>
+        </>
+      )}
     </Paper>
   );
 };

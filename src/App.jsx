@@ -4,11 +4,11 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import HomePage from './HomePage';
 import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm ';
-import ForgotPasswordForm from './ForgotPasswordForm ';
-import CourseRegistrationPage from './CourseRegistrationPage';
+import RegisterForm from './RegisterForm';
+import ForgotPasswordForm from './ForgotPasswordForm';
+
 import VerifyCodeForm from './VerifyCodeForm';
-import NewPasswordForm from './NewPasswordForm ';
+import NewPasswordForm from './NewPasswordForm';
 import Header from './Header';
 import ShowLoginModal from './showLoginModal';
 
@@ -60,16 +60,7 @@ function App() {
           <Routes>
             <Route path='/' element={<Navigate to='/home' replace />} />
             <Route path='/home' element={<HomePage />} />
-            <Route
-              path='/course-registration'
-              element={
-                permissions.includes('register_course') ? (
-                  <CourseRegistrationPage />
-                ) : (
-                  <Navigate to='/home' replace />
-                )
-              }
-            />
+            
             <Route
               path='/login'
               element={
